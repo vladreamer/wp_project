@@ -1,6 +1,8 @@
 Wordpress for Kubernetes with PersistentVolume
+-----------------------------------------------
 
 NFS file share /mnt/nfs_share/wp_project has to be created before all steps.
+--------------
 
 sudo apt update
 sudo apt list --upgradable
