@@ -1,0 +1,7 @@
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=test123
+resources:
+  - wp-app2.yaml
+  - wp-mysql2.yaml

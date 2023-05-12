@@ -1,0 +1,82 @@
+apiVersion: v1                                                                                
+kind: PersistentVolume                                                                        
+metadata:                                                                                     
+  name: mysql-pv 
+  labels:
+    app: wordpress                                                                             
+spec:                                                                                         
+  capacity:                                                                                   
+    storage: 250Mi     
+  accessModes:                                                                                
+    - ReadWriteOnce                                                                           
+  hostPath:                                                                                   
+    path: "/mnt/nfs_share/wp_project/mysqldb"                                                                    
+---                                                                                           
+apiVersion: v1                                                                                
+kind: PersistentVolumeClaim                                                                   
+metadata:                                                                                     
+  name: mysql-pv-claim
+  labels:
+    app: wordpress                                                                        
+spec:                                                                                         
+  accessModes:                                                                                
+    - ReadWriteOnce                                                                           
+  resources:                                                                                  
+    requests:                                                                                 
+      storage: 250Mi                                                                          
+---
+   
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---       
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      volumes:
+      - name: mysql-pv
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+      containers:
+      - name: mysql
+        image: mysql:5.6
+        #image: mysql:5.7.42
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        volumeMounts:
+        - name: mysql-pv
+          mountPath: /var/lib/mysql 
+        ports:
+          - containerPort: 3306
+            name: mysql
