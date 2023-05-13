@@ -59,3 +59,4 @@ kubectl apply -k .
 References:
 
 1) https://gitlab.com/nb-tech-support/devops/-/blob/master/Deploy%20MySQL%20on%20Kubernetes
+2) https://medium.com/@madushagunasekara/export-mysql-db-dump-from-kubernetes-pod-and-restore-mysql-db-on-kubernetes-pod-6f4ecc6b5a64

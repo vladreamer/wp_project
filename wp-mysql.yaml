@@ -1,6 +1,33 @@
 apiVersion: v1                                                                                
 kind: PersistentVolume                                                                        
 metadata:                                                                                     
+  name: backup-pv 
+  labels:
+    app: wordpress                                                                             
+spec:                                                                                         
+  capacity:                                                                                   
+    storage: 400Mi     
+  accessModes:                                                                              
+    - ReadWriteOnce                                                                           
+  hostPath:                                                                                   
+    path: "/mnt/nfs_share/wp_project/db_backup"                                                                    
+---                                                                                           
+apiVersion: v1                                                                                
+kind: PersistentVolumeClaim                                                                   
+metadata:                                                                                     
+  name: backup-pv-claim
+  labels:
+    app: wordpress                                                                        
+spec:                                                                                         
+  accessModes:                                                                                
+    - ReadWriteOnce                                                                           
+  resources:                                                                                  
+    requests:                                                                                 
+      storage: 250Mi                                                                          
+---
+apiVersion: v1                                                                                
+kind: PersistentVolume                                                                        
+metadata:                                                                                     
   name: mysql-pv 
   labels:
     app: wordpress                                                                             
@@ -64,6 +91,9 @@ spec:
       - name: mysql-pv
         persistentVolumeClaim:
           claimName: mysql-pv-claim
+      - name: backup-pv
+        persistentVolumeClaim:
+          claimName: backup-pv-claim
       containers:
       - name: mysql
         image: mysql:5.6
@@ -77,6 +107,8 @@ spec:
         volumeMounts:
         - name: mysql-pv
           mountPath: /var/lib/mysql 
+        - name: backup-pv
+          mountPath: /mnt/backup 
         ports:
           - containerPort: 3306
             name: mysql
